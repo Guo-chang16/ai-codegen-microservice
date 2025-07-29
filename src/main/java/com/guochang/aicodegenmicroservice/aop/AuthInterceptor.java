@@ -1,10 +1,12 @@
-/*
 package com.guochang.aicodegenmicroservice.aop;
 
 
 import com.guochang.aicodegenmicroservice.annotation.AuthCheck;
 import com.guochang.aicodegenmicroservice.common.ErrorCode;
 import com.guochang.aicodegenmicroservice.exception.BusinessException;
+import com.guochang.aicodegenmicroservice.model.entity.User;
+import com.guochang.aicodegenmicroservice.model.enums.UserRoleEnum;
+import com.guochang.aicodegenmicroservice.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -22,14 +24,6 @@ public class AuthInterceptor {
 
     @Resource
     private UserService userService;
-
-    */
-/**
-     * 执行拦截
-     *
-     * @param joinPoint 切入点
-     * @param authCheck 权限校验注解
-     *//*
 
     @Around("@annotation(authCheck)")
     public Object doInterceptor(ProceedingJoinPoint joinPoint, AuthCheck authCheck) throws Throwable {
@@ -57,4 +51,4 @@ public class AuthInterceptor {
         // 通过权限校验，放行
         return joinPoint.proceed();
     }
-}*/
+}
