@@ -27,11 +27,13 @@ public enum ErrorCode {
      */
     private final String message;
 
+    // 构造方法
     ErrorCode(int code, String message) {
         this.code = code;
         this.message = message;
     }
 
+    // getter
     public int getCode() {
         return code;
     }

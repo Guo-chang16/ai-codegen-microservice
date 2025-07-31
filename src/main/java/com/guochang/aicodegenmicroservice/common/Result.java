@@ -15,6 +15,7 @@ public class Result {
      * @param <T>
      * @return
      */
+    //为了统一返回格式，故而采取方法重载
     public static <T> BaseResponse<T> success(T data) {
         return new BaseResponse<>(0, data, "ok");
     }
@@ -25,6 +26,7 @@ public class Result {
      * @param errorCode
      * @return
      */
+    // 重载
     public static BaseResponse error(ErrorCode errorCode) {
         return new BaseResponse<>(errorCode);
     }
@@ -36,6 +38,7 @@ public class Result {
      * @param message
      * @return
      */
+    // 重载
     public static BaseResponse error(int code, String message) {
         return new BaseResponse(code, null, message);
     }
