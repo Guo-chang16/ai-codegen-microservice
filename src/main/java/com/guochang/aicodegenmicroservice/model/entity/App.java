@@ -47,7 +47,7 @@ public class App {
     /**
      * 部署时间
      */
-    private Date deployedTime;
+    private LocalDateTime deployedTime;
 
     /**
      * 优先级

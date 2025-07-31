@@ -2,6 +2,7 @@ package com.guochang.aicodegenmicroservice.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.guochang.aicodegenmicroservice.ai.AiCodeGeneratorService;
@@ -30,10 +31,15 @@ import dev.langchain4j.service.SystemMessage;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 应用接口
@@ -51,6 +57,54 @@ public class AppController {
     @Resource
     private AiCodeGeneratorService aiCodeService;
 
+
+    /**
+     * 应用部署
+     *
+     * @param appDeployRequest 部署请求
+     * @param request          请求
+     * @return 部署 URL
+     */
+    @PostMapping("/deploy")
+    public BaseResponse<String> deployApp(@RequestBody AppDeployRequest appDeployRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(appDeployRequest == null, ErrorCode.PARAMS_ERROR);
+        Long appId = appDeployRequest.getAppId();
+        ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用 ID 不能为空");
+        // 获取当前登录用户
+        User loginUser = userService.getLoginUser(request);
+        // 调用服务部署应用
+        String deployUrl = appService.deployApp(appId, loginUser);
+        return Result.success(deployUrl);
+    }
+
+
+    /**
+     * 自动生成应用
+     *
+     * @param userMessage 用户输入
+     * @param appId       应用id
+     * @param request     请求
+     * @return 生成的代码
+     */
+    //   GET /chat/gen/code?userMessage=生成一个博客网站&appId=1L
+    @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<String>> chatToGenCode(@RequestParam String userMessage, @RequestParam Long appId, HttpServletRequest request) {
+        ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用id不正确");
+        ThrowUtils.throwIf(StrUtil.isBlank(userMessage), ErrorCode.PARAMS_ERROR, "提示词不能为空");
+        //TODO 获取initprompt
+        User loginUser = userService.getLoginUser(request);
+        Flux<String> stringFlux = appService.chatToGenCode(userMessage, appId, loginUser);
+        return stringFlux
+                .map(chunk -> {
+                    Map<String, String> map = Map.of("d", chunk);
+                    String jsonData = JSONUtil.toJsonStr(map);
+                    return ServerSentEvent.<String>builder().data(jsonData).build();
+                })
+                .concatWith(Mono.just(
+                        //发送结束事件
+                        ServerSentEvent.<String>builder().event("done").data("").build()
+                ));
+    }
     /**
      * 创建应用
      *
@@ -171,13 +225,6 @@ public class AppController {
     }
 
 
-    /**
-     * 分页查询自己的应用列表（支持根据名称查询，每页最多 20 个）
-     *
-     * @param appQueryRequest 查询请求
-     * @param request 请求对象
-     * @return 分页结果
-     */
     /**
      * 分页获取当前用户创建的应用列表
      *

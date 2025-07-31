@@ -19,12 +19,12 @@ class AiCodeGeneratorFacadeTest {
 
     @Test
     void generateAndSaveCode() {
-        aiCodeGeneratorFacade.generateAndSaveCode("生成一个html页面，页面为登陆页面", CodeGenTypeEnum.HTML);
+        aiCodeGeneratorFacade.generateAndSaveCode("生成一个html页面，页面为登陆页面", CodeGenTypeEnum.HTML, 1L);
     }
 
     @Test
     void generateAndSaveCodeStream() {
-        Flux<String> stringFlux = aiCodeGeneratorFacade.generateAndSaveCodeStream("生成一个页面，页面为登陆页面", CodeGenTypeEnum.HTML);
+        Flux<String> stringFlux = aiCodeGeneratorFacade.generateAndSaveCodeStream("生成一个页面，页面为登陆页面", CodeGenTypeEnum.HTML, 1L);
         // 等待所有数据接收完毕
         List<String> res = stringFlux.collectList().block();
         // 将数据拼接成字符串

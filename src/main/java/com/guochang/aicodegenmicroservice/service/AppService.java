@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.guochang.aicodegenmicroservice.model.dto.app.AppQueryRequest;
 import com.guochang.aicodegenmicroservice.model.entity.App;
+import com.guochang.aicodegenmicroservice.model.entity.User;
 import com.guochang.aicodegenmicroservice.model.vo.AppVO;
 import jakarta.servlet.http.HttpServletRequest;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -39,4 +41,9 @@ public interface AppService extends IService<App> {
      * @return 查询条件
      */
     QueryWrapper<App> getQueryWrapper(AppQueryRequest appQueryRequest);
+
+    Flux<String> chatToGenCode(String userMessage, Long appId, User loginUser);
+
+    String deployApp(Long appId, User loginUser);
+
 }
