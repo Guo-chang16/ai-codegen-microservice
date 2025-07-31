@@ -147,12 +147,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         long timestamp = System.currentTimeMillis();
         String timeSuffix = String.valueOf(timestamp).substring(8); // 时间戳后4位
 
-        // 3. 加2位随机数（进一步避免同一毫秒内重复，范围00-99）
-        int randomNum = ThreadLocalRandom.current().nextInt(100); // 线程安全的随机数
-        String randomSuffix = String.format("%02d", randomNum); // 确保2位，不足补0
-
-        // 4. 拼接生成用户名
-        return prefix + timeSuffix + randomSuffix;
+        // 3. 随机数（范围0000-9999）
+        return prefix + timeSuffix ;
     }
 
     @Override

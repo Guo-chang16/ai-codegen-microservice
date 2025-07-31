@@ -1,6 +1,7 @@
 ### CUSTOM ###
 application-local.yml
 tmp
+generator/
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
