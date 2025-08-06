@@ -25,4 +25,7 @@ private AiCodeGeneratorService aiCodeGeneratorService;
         MultiFileCodeResult res =aiCodeGeneratorService.generateMultiFileCode("请生成一个html博客网站页面，不超过50行") ;
         Assertions.assertNotNull(res);
     }
+
+
+
 }

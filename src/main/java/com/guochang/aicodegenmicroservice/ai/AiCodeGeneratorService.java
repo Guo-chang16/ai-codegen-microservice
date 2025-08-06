@@ -10,19 +10,17 @@ import reactor.core.publisher.Flux;
 public interface AiCodeGeneratorService {
     /**
      * 生成html代码
-     * @param prompt 用户提示词
      * @return
      */
     @SystemMessage(fromResource="prompt/codegen-html-system-prompt.txt")
-    HtmlCodeResult generateHtmlCode(String prompt);
+    HtmlCodeResult generateHtmlCode(String userMessage);
 
     /**
      * 生成多文件代码
-     * @param prompt 用户提示词
      * @return
      */
     @SystemMessage(fromResource="prompt/codegen-multi-file-system-prompt.txt")
-    MultiFileCodeResult generateMultiFileCode(String prompt);
+    MultiFileCodeResult generateMultiFileCode(String userMessage);
 
 
 

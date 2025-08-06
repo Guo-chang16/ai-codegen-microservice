@@ -31,6 +31,7 @@ public class ChatHistoryController {
     private ChatHistoryService chatHistoryService;
 
 
+   /*
     @PostMapping
     public boolean save(@RequestBody ChatHistory chatHistory){return chatHistoryService.save(chatHistory);}
 
@@ -39,7 +40,7 @@ public class ChatHistoryController {
 
     @PostMapping
     public boolean update(@RequestBody ChatHistory chatHistory){return chatHistoryService.updateById(chatHistory);}
-
+    */
     @GetMapping("list")
     public List<ChatHistory> list(){return chatHistoryService.list();}
 
