@@ -53,13 +53,6 @@
             <version>5.8.37</version>
         </dependency>
 
-        <!-- Spring Session + Redis -->
-        <dependency>
-            <groupId>org.springframework.session</groupId>
-            <artifactId>spring-session-data-redis</artifactId>
-        </dependency>
-
-
         <!--knife4j-->
         <dependency>
             <groupId>com.github.xiaoymin</groupId>

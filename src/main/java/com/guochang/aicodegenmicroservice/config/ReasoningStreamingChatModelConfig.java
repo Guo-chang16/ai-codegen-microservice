@@ -9,9 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@Slf4j
 @Data
-@ConfigurationProperties(prefix = "langchain4j-open-ai-model")
+@ConfigurationProperties(prefix = "langchain4j.open-ai.chat-model")
 public class ReasoningStreamingChatModelConfig {
     private String baseUrl;
 
@@ -20,11 +19,11 @@ public class ReasoningStreamingChatModelConfig {
     @Bean
     public StreamingChatModel reasoningStreamingChatModel() {
         //为了测试
-        final String modelName = "deepseek-chat";
-        final int maxTokens = 8192;
+//        final String modelName = "deepseek-chat";
+//        final int maxTokens = 8192;
         //生产环境中
-        //final String modelName = "deepseek-reasoner";
-        //final int maxTokens = 32768;
+        final String modelName = "deepseek-reasoner";
+        final int maxTokens = 32768;
         return OpenAiStreamingChatModel.builder()
                 .baseUrl(baseUrl)
                 .apiKey(apiKey)
@@ -34,7 +33,4 @@ public class ReasoningStreamingChatModelConfig {
                 .logResponses( true)
                 .build();
     }
-
-
-
 }

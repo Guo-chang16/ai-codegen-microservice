@@ -3,8 +3,13 @@ package com.guochang.aicodegenmicroservice.ai;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.guochang.aicodegenmicroservice.ai.tools.FileWriteTool;
+import com.guochang.aicodegenmicroservice.common.ErrorCode;
+import com.guochang.aicodegenmicroservice.exception.BusinessException;
+import com.guochang.aicodegenmicroservice.model.enums.CodeGenTypeEnum;
 import com.guochang.aicodegenmicroservice.service.ChatHistoryService;
 import dev.langchain4j.community.store.memory.chat.redis.RedisChatMemoryStore;
+import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
@@ -24,13 +29,16 @@ public class AiCodeGeneratorServiceFactory {
     private ChatModel chatModel;
 
     @Resource
-    private StreamingChatModel streamingChatModel;
+    private StreamingChatModel openAiStreamingChatModel;
 
     @Resource
     private RedisChatMemoryStore redisChatMemoryStore;
 
     @Resource
     private ChatHistoryService chatHistoryService;
+
+    @Resource
+    private StreamingChatModel reasoningStreamingChatModel;
 
     /**
      * AI 服务实例缓存
@@ -39,7 +47,7 @@ public class AiCodeGeneratorServiceFactory {
      * - 写入后 30 分钟过期
      * - 访问后 10 分钟过期
      */
-    private final Cache<Long, AiCodeGeneratorService> serviceCache = Caffeine.newBuilder()
+    private final Cache<String, AiCodeGeneratorService> serviceCache = Caffeine.newBuilder()
             // 设置缓存的最大容量为1000个实例
             .maximumSize(1000)
             // 设置写入缓存30分钟后过期
@@ -58,14 +66,14 @@ public class AiCodeGeneratorServiceFactory {
      * 如果不存在，则使用 createAiCodeGeneratorService 方法创建新实例，并将其存入缓存
      */
     public AiCodeGeneratorService getAiCodeGeneratorService(long appId) {
-        return serviceCache.get(appId, this::createAiCodeGeneratorService);
+        return getAiCodeGeneratorService(appId, CodeGenTypeEnum.HTML);
     }
 
     /**
      * 创建新的 AI 服务实例
      * 这是当缓存中没有对应 appId 的服务实例时，创建新实例的方法。
      */
-    private AiCodeGeneratorService createAiCodeGeneratorService(long appId) {
+    private AiCodeGeneratorService createAiCodeGeneratorService(long appId, CodeGenTypeEnum codeGenType) {
         log.info("为 appId: {} 创建新的 AI 服务实例", appId);
         // 根据 appId 构建独立的对话记忆
         MessageWindowChatMemory chatMemory = MessageWindowChatMemory
@@ -76,42 +84,45 @@ public class AiCodeGeneratorServiceFactory {
                 .build();
         // 加载 appId 对应的对话历史
         chatHistoryService.loadChatHistoryToMemory(appId, chatMemory, 20);
-        // 创建 AiCodeGeneratorService
-        return AiServices.builder(AiCodeGeneratorService.class)
-                .chatModel(chatModel)
-                .streamingChatModel(streamingChatModel)
-                .chatMemory(chatMemory)
-                .build();
+        return switch (codeGenType) {
+            case HTML, MULTI_FILE -> AiServices.builder(AiCodeGeneratorService.class)
+                    .chatModel(chatModel)
+                    .streamingChatModel(openAiStreamingChatModel)
+                    .chatMemory(chatMemory)
+                    .build();
+
+            case VUE_PROJECT -> AiServices.builder(AiCodeGeneratorService.class)
+                    .chatModel(chatModel)
+                    .streamingChatModel(reasoningStreamingChatModel)
+                    // 根据 id 构建独立的对话记忆(框架要求chatMemoryProvider)
+                    .chatMemoryProvider(memoryId -> chatMemory)
+                    .tools(new FileWriteTool())
+                    .hallucinatedToolNameStrategy(toolExecutionRequest ->
+                            ToolExecutionResultMessage.from(toolExecutionRequest,
+                            "Error executing tool: " + toolExecutionRequest.name()))
+                    .build();
+
+            default -> throw new BusinessException(ErrorCode.PARAMS_ERROR,"没有这种类型");
+        };
     }
+
+
     /**
-     * 创建AiCodeGeneratorService
-     * @param appId
-     * @return
+     * 根据 appId 和代码生成类型获取服务（带缓存）
      */
-    public AiCodeGeneratorService getAiCodeGeneratorService(Long appId){
-        // 创建一个独立的对话记忆
-        MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
-                .id(appId)
-                .chatMemoryStore(redisChatMemoryStore)
-                .maxMessages(20)
-                .build();
-        return AiServices.builder(AiCodeGeneratorService.class)
-                .chatModel(chatModel)
-                .streamingChatModel(streamingChatModel)
-                // 根据 id 构建独立的对话记忆
-                .chatMemory(chatMemory)
-                .build();
+    public AiCodeGeneratorService getAiCodeGeneratorService(long appId, CodeGenTypeEnum codeGenType) {
+        String cacheKey = buildCacheKey(appId, codeGenType);
+        return serviceCache.get(cacheKey, key -> createAiCodeGeneratorService(appId, codeGenType));
     }
 
     /**
      * 创建AiCodeGeneratorService
      * @return
      */
-    @Bean
     public AiCodeGeneratorService createAiCodeGeneratorService() {
         return AiServices.builder(AiCodeGeneratorService.class)
                 .chatModel(chatModel)
-                .streamingChatModel(streamingChatModel)
+                .streamingChatModel(openAiStreamingChatModel)
                 // 根据 id 构建独立的对话记忆
                 .chatMemoryProvider(memoryId -> MessageWindowChatMemory
                         .builder()
@@ -128,6 +139,17 @@ public class AiCodeGeneratorServiceFactory {
     @Bean
     public AiCodeGeneratorService aiCodeGeneratorService() {
         return getAiCodeGeneratorService(0L);
+    }
+
+
+    /**
+     * 构建缓存Key
+     * @param appId
+     * @param codeGenType
+     * @return
+     */
+    private String buildCacheKey(long appId, CodeGenTypeEnum codeGenType) {
+        return appId+"_"+codeGenType.getValue();
     }
 
 
