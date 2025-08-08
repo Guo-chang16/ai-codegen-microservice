@@ -1,7 +1,8 @@
 spring:
   application:
     name: ai-codegen-microservice
-    # session 配置
+  main:
+    allow-circular-references: true
 
   profiles:
     active: local

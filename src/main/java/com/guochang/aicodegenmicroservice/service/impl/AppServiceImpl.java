@@ -8,7 +8,10 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.guochang.aicodegenmicroservice.ai.AiCodeGenTitleService;
+import com.guochang.aicodegenmicroservice.ai.AiCodeGenTypeRoutingService;
 import com.guochang.aicodegenmicroservice.common.ErrorCode;
+import com.guochang.aicodegenmicroservice.common.Result;
 import com.guochang.aicodegenmicroservice.constant.AppConstant;
 import com.guochang.aicodegenmicroservice.core.AiCodeGeneratorFacade;
 import com.guochang.aicodegenmicroservice.core.builder.VueProjectBuilder;
@@ -16,6 +19,7 @@ import com.guochang.aicodegenmicroservice.core.handler.StreamHandlerExecutor;
 import com.guochang.aicodegenmicroservice.exception.BusinessException;
 import com.guochang.aicodegenmicroservice.exception.ThrowUtils;
 import com.guochang.aicodegenmicroservice.mapper.AppMapper;
+import com.guochang.aicodegenmicroservice.model.dto.app.AppAddRequest;
 import com.guochang.aicodegenmicroservice.model.dto.app.AppQueryRequest;
 import com.guochang.aicodegenmicroservice.model.entity.App;
 import com.guochang.aicodegenmicroservice.model.entity.User;
@@ -25,6 +29,7 @@ import com.guochang.aicodegenmicroservice.model.vo.AppVO;
 import com.guochang.aicodegenmicroservice.model.vo.UserVO;
 import com.guochang.aicodegenmicroservice.service.AppService;
 import com.guochang.aicodegenmicroservice.service.ChatHistoryService;
+import com.guochang.aicodegenmicroservice.service.ScreenshotService;
 import com.guochang.aicodegenmicroservice.service.UserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +66,44 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App>
 
     @Resource
     private VueProjectBuilder vueProjectBuilder;
+
+    @Resource
+    private ScreenshotService screenshotService;
+
+    @Resource
+    private AiCodeGenTitleService aiCodeGenTitleService;
+
+    @Resource
+    private AiCodeGenTypeRoutingService aiCodeGenTypeRoutingService;
+
+    @Resource
+    private AppService appService;
+
+    /**
+     * 添加应用
+     * @param appAddRequest
+     * @param loginUser
+     * @return
+     */
+    @Override
+    public long addApp(AppAddRequest appAddRequest, User loginUser) {
+        // 构造入库对象
+        App app = new App();
+        BeanUtil.copyProperties(appAddRequest, app);
+        app.setUserId(loginUser.getId());
+        String initPrompt = appAddRequest.getInitPrompt();
+        String title = aiCodeGenTitleService.generateTitle(initPrompt);
+        //app.setAppName(initPrompt.substring(0, Math.min(initPrompt.length(), 12)));
+        app.setAppName(title);
+        CodeGenTypeEnum codeGenTypeEnum = aiCodeGenTypeRoutingService.aiCodeGenTypeRouting(initPrompt);
+        app.setCodeGenType(codeGenTypeEnum.getValue());
+        // 插入数据库
+        boolean result = appService.save(app);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return app.getId();
+    }
+
+
 
     @Override
     public Flux<String> chatToGenCode(String userMessage, Long appId, User loginUser) {
@@ -150,8 +193,37 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App>
 
 
         //返回可访问的URL
-        return String.format("%s/%s/", AppConstant.CODE_DEPLOY_HOST, deployKey);
+        String appDeployUrl = String.format("%s/%s/", AppConstant.CODE_DEPLOY_HOST, deployKey);
+
+        //异步生成截图并更新应用封面
+        generateAppScreenshotAsync(appId, appDeployUrl);
+
+        return appDeployUrl;
+
     }
+
+    /**
+     * 异步生成应用截图并更新封面
+     *
+     * @param appId  应用ID
+     * @param appUrl 应用访问URL
+     */
+    @Override
+    public void generateAppScreenshotAsync(Long appId, String appUrl) {
+        // 使用虚拟线程异步执行
+        Thread.startVirtualThread(() -> {
+            // 调用截图服务生成截图并上传
+            String screenshotUrl = screenshotService.generateAndUploadScreenshot(appUrl);
+            // 更新应用封面字段
+            App updateApp = new App();
+            updateApp.setId(appId);
+            updateApp.setCover(screenshotUrl);
+            boolean updated = this.updateById(updateApp);
+            ThrowUtils.throwIf(!updated, ErrorCode.OPERATION_ERROR, "更新应用封面字段失败");
+        });
+    }
+
+
 
     @Override
     public AppVO getAppVO(App app) {

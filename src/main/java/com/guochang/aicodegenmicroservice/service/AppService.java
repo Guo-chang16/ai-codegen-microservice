@@ -3,6 +3,7 @@ package com.guochang.aicodegenmicroservice.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.guochang.aicodegenmicroservice.model.dto.app.AppAddRequest;
 import com.guochang.aicodegenmicroservice.model.dto.app.AppQueryRequest;
 import com.guochang.aicodegenmicroservice.model.entity.App;
 import com.guochang.aicodegenmicroservice.model.entity.User;
@@ -46,4 +47,8 @@ public interface AppService extends IService<App> {
 
     String deployApp(Long appId, User loginUser);
 
+
+    void generateAppScreenshotAsync(Long appId, String appUrl);
+
+    long addApp(AppAddRequest appAddRequest,User loginUser);
 }

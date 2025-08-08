@@ -23,6 +23,9 @@ public interface AppConstant {
      */
     String CODE_DEPLOY_ROOT_DIR = System.getProperty("user.dir") + "/tmp/code_deploy";
 
+
+    String SCREENSHOT_ROOT_DIR = System.getProperty("user.dir") + "/tmp/screenshots/";
+
     /**
      * 应用部署域名
      */
