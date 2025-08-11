@@ -22,9 +22,8 @@ public interface ChatHistoryService extends IService<ChatHistory> {
 
     QueryWrapper getQueryWrapper(ChatHistoryQueryRequest chatHistoryQueryRequest);
 
-    Page<ChatHistory> listAppChatHistoryByPage(Long appId, int pageSize,
-                                               LocalDateTime lastCreateTime,
-                                               User loginUser);
+
+    Page<ChatHistory> listAppChatHistoryByPage(Long appId, int pageSize, LocalDateTime lastCreateTime, User loginUser);
 
     int loadChatHistoryToMemory(Long appId, MessageWindowChatMemory chatMemory, int maxCount);
 }

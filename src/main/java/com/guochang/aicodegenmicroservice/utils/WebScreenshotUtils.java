@@ -19,6 +19,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
+import java.net.URL;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -65,7 +66,7 @@ public static String saveWebPageScreenshot(String webUrl) {
     String compressImagePath = rootPath + File.separator + RandomUtil.randomNumbers(5) + IMAGE_SUFFIX;
     compressImage(imagePath, compressImagePath);
 
-    //删除原始图片
+    //删除原始图片  清理本地缓存
     boolean del = FileUtil.del(imagePath);
 
     return compressImagePath;
@@ -83,7 +84,11 @@ public static String saveWebPageScreenshot(String webUrl) {
     private static WebDriver initChromeDriver(int width, int height) {
         try {
             // 自动管理 ChromeDriver
-            WebDriverManager.chromedriver().browserVersion("135").setup();
+            WebDriverManager.chromedriver()
+                    .browserVersion("135")
+                    .driverRepositoryUrl(new URL("https://npmmirror.com/mirrors/chromedriver/"))
+                    .cachePath("./webdriver/cache")
+                    .setup();
             // 配置 Chrome 选项
             ChromeOptions options = new ChromeOptions();
             // 无头模式

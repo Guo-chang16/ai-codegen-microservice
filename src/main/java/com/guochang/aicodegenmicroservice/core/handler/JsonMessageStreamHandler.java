@@ -54,17 +54,15 @@ public class JsonMessageStreamHandler {
         // 用于跟踪已经见过的工具ID，判断是否是第一次调用
         Set<String> seenToolIds = new HashSet<>();
         return
-
-        originFlux
+        originFlux .map(chunk -> {
+                    // 收集AI响应内容
+                    chatHistoryStringBuilder.append(chunk);
+                    return chunk;
+                })
                 .doOnComplete(() -> {
                     // 流式响应完成后，添加 AI 消息到对话历史
                     String aiResponse = chatHistoryStringBuilder.toString();
-                    if (StringUtils.isNotBlank(aiResponse)) {
-                        chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
-                    } else {
-                        // 可选择记录日志或执行其他操作
-                        log.warn("消息内容为空，跳过添加聊天记录");
-                    }
+                    chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
                     // 异步构造 Vue 项目
                     String projectPath = AppConstant.CODE_OUTPUT_ROOT_DIR + "/vue_project_" + appId;
                     vueProjectBuilder.buildProjectAsync(projectPath);

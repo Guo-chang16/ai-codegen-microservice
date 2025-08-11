@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+
 @Configuration
 @ConfigurationProperties(prefix = "spring.data.redis")
 @Data
@@ -19,6 +20,10 @@ public class RedisChatMemoryStoreConfig {
 
     private long ttl;
 
+    /**
+     * 创建RedisChatMemoryStore实例
+     * @return
+     */
     @Bean
     public RedisChatMemoryStore redisChatMemoryStore() {
         return RedisChatMemoryStore.builder()

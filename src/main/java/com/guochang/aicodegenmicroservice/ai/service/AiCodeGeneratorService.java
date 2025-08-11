@@ -28,5 +28,5 @@ public interface AiCodeGeneratorService {
      * @return
      */
     @SystemMessage(fromResource="prompt/codegen-vue-project-system-prompt.txt")
-    TokenStream generateVueProjectCodeStream(@MemoryId long appId, @UserMessage String userMessage);
+    TokenStream generateVueProjectCodeStream(@MemoryId long memoryId, @UserMessage String userMessage);
 }

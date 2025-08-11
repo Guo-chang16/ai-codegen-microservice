@@ -16,7 +16,6 @@ public class AiCodeGenTypeRoutingServiceFactory {
     @Resource
     private ChatModel chatModel;
 
-
     @Bean
     public AiCodeGenTypeRoutingService aiCodeGenTypeRoutingService(){
         return AiServices.builder(AiCodeGenTypeRoutingService.class)

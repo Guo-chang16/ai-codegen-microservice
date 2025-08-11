@@ -71,7 +71,6 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
 
     /**
      * 加载历史对话到记忆中
-     *
      * @param appId
      * @param chatMemory
      * @param maxCount
@@ -162,7 +161,7 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
                                                       LocalDateTime lastCreateTime,
                                                       User loginUser) {
         ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用ID不能为空");
-        ThrowUtils.throwIf(pageSize <= 0 || pageSize > 50, ErrorCode.PARAMS_ERROR, "页面大小必须在1-50之间");
+        ThrowUtils.throwIf(pageSize <= 0 || pageSize > 50, ErrorCode.PARAMS_ERROR, "页面大小必须在1-20之间");
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NOT_LOGIN_ERROR);
         // 验证权限：只有应用创建者和管理员可以查看
         App app = appService.getById(appId);
@@ -171,17 +170,14 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
         boolean isCreator = app.getUserId().equals(loginUser.getId());
         ThrowUtils.throwIf(!isAdmin && !isCreator, ErrorCode.NO_AUTH_ERROR, "无权查看该应用的对话历史");
         // 构建查询条件
-        ChatHistoryQueryRequest queryRequest = new ChatHistoryQueryRequest();
-        queryRequest.setAppId(appId);
-        queryRequest.setLastCreateTime(lastCreateTime);
-        QueryWrapper queryWrapper = this.getQueryWrapper(queryRequest);
+        ChatHistoryQueryRequest chatHistoryQueryRequest = new ChatHistoryQueryRequest();
+        chatHistoryQueryRequest.setAppId(appId);
+        chatHistoryQueryRequest.setLastCreateTime(lastCreateTime);
+        QueryWrapper queryWrapper = getQueryWrapper(chatHistoryQueryRequest);
         // 查询数据
         return this.page(Page.of(1, pageSize), queryWrapper);
     }
 
 
 }
-
-
-
 
