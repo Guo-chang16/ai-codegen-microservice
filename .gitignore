@@ -2,7 +2,7 @@
 application-local.yml
 tmp
 generator/
-HELP.md
+webdriver/
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
