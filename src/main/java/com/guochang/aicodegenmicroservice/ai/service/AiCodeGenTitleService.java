@@ -1,4 +1,4 @@
-package com.guochang.aicodegenmicroservice.ai;
+package com.guochang.aicodegenmicroservice.ai.service;
 
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;

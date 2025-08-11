@@ -1,9 +1,10 @@
-package com.guochang.aicodegenmicroservice.ai;
+package com.guochang.aicodegenmicroservice.ai.factory;
 
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.guochang.aicodegenmicroservice.ai.tools.FileWriteTool;
+import com.guochang.aicodegenmicroservice.ai.service.AiCodeGeneratorService;
+import com.guochang.aicodegenmicroservice.ai.tools.ToolManager;
 import com.guochang.aicodegenmicroservice.common.ErrorCode;
 import com.guochang.aicodegenmicroservice.exception.BusinessException;
 import com.guochang.aicodegenmicroservice.model.enums.CodeGenTypeEnum;
@@ -39,6 +40,12 @@ public class AiCodeGeneratorServiceFactory {
 
     @Resource
     private StreamingChatModel reasoningStreamingChatModel;
+
+
+    @Resource
+    private ToolManager toolManager;
+
+
 
     /**
      * AI 服务实例缓存
@@ -91,17 +98,15 @@ public class AiCodeGeneratorServiceFactory {
                     .chatMemory(chatMemory)
                     .build();
 
+            // Vue 项目生成使用推理模型
             case VUE_PROJECT -> AiServices.builder(AiCodeGeneratorService.class)
-                    .chatModel(chatModel)
                     .streamingChatModel(reasoningStreamingChatModel)
-                    // 根据 id 构建独立的对话记忆(框架要求chatMemoryProvider)
                     .chatMemoryProvider(memoryId -> chatMemory)
-                    .tools(new FileWriteTool())
-                    .hallucinatedToolNameStrategy(toolExecutionRequest ->
-                            ToolExecutionResultMessage.from(toolExecutionRequest,
-                            "Error executing tool: " + toolExecutionRequest.name()))
+                    .tools(toolManager.getAllTools())
+                    .hallucinatedToolNameStrategy(toolExecutionRequest -> ToolExecutionResultMessage.from(
+                            toolExecutionRequest, "Error: there is no tool called " + toolExecutionRequest.name()
+                    ))
                     .build();
-
             default -> throw new BusinessException(ErrorCode.PARAMS_ERROR,"没有这种类型");
         };
     }

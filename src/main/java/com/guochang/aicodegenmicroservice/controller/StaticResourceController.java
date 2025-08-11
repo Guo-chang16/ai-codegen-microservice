@@ -1,5 +1,5 @@
-package com.guochang.aicodegenmicroservice.controller;
 
+package com.guochang.aicodegenmicroservice.controller;
 import com.guochang.aicodegenmicroservice.constant.AppConstant;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.io.FileSystemResource;
@@ -15,6 +15,7 @@ import org.springframework.web.servlet.HandlerMapping;
 
 import java.io.File;
 
+
 @RestController
 @RequestMapping("/static")
 public class StaticResourceController {
@@ -22,10 +23,7 @@ public class StaticResourceController {
     // 应用生成根目录（用于浏览）
     private static final String PREVIEW_ROOT_DIR = AppConstant.CODE_OUTPUT_ROOT_DIR;
 
-    /**
-     * 提供静态资源访问，支持目录重定向
-     * 访问格式：http://localhost:8123/api/static/{deployKey}[/{fileName}]
-     */
+
     @GetMapping("/{deployKey}/**")
     public ResponseEntity<Resource> serveStaticResource(
             @PathVariable String deployKey,
@@ -61,9 +59,7 @@ public class StaticResourceController {
         }
     }
 
-    /**
-     * 根据文件扩展名返回带字符编码的 Content-Type
-     */
+
     private String getContentTypeWithCharset(String filePath) {
         if (filePath.endsWith(".html")) return "text/html; charset=UTF-8";
         if (filePath.endsWith(".css")) return "text/css; charset=UTF-8";
@@ -73,3 +69,4 @@ public class StaticResourceController {
         return "application/octet-stream";
     }
 }
+

@@ -5,9 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.guochang.aicodegenmicroservice.ai.AiCodeGenTitleService;
-import com.guochang.aicodegenmicroservice.ai.AiCodeGenTypeRoutingService;
-import com.guochang.aicodegenmicroservice.ai.AiCodeGeneratorService;
 import com.guochang.aicodegenmicroservice.annotation.AuthCheck;
 import com.guochang.aicodegenmicroservice.common.BaseResponse;
 import com.guochang.aicodegenmicroservice.common.DeleteRequest;
@@ -18,23 +15,15 @@ import com.guochang.aicodegenmicroservice.constant.UserConstant;
 import com.guochang.aicodegenmicroservice.exception.BusinessException;
 import com.guochang.aicodegenmicroservice.exception.ThrowUtils;
 import com.guochang.aicodegenmicroservice.model.dto.app.*;
-import com.guochang.aicodegenmicroservice.model.dto.user.UserQueryRequest;
 import com.guochang.aicodegenmicroservice.model.entity.App;
 import com.guochang.aicodegenmicroservice.model.entity.User;
-import com.guochang.aicodegenmicroservice.model.enums.CodeGenTypeEnum;
 import com.guochang.aicodegenmicroservice.model.vo.AppVO;
-import com.guochang.aicodegenmicroservice.model.vo.UserVO;
 import com.guochang.aicodegenmicroservice.service.AppService;
 import com.guochang.aicodegenmicroservice.service.ProjectDownloadService;
 import com.guochang.aicodegenmicroservice.service.UserService;
-import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.request.ChatRequest;
-import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.service.SystemMessage;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.BeanUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
@@ -63,6 +52,34 @@ public class AppController {
     private ProjectDownloadService projectDownloadService;
 
     /**
+     * 自动生成应用
+     *
+     * @param userMessage 用户输入
+     * @param appId       应用id
+     * @param request     请求
+     * @return 让前端流式显示代码
+     */
+    //   GET /chat/gen/code?userMessage=生成一个博客网站&appId=1L
+    @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<String>> chatToGenCode(@RequestParam String userMessage, @RequestParam Long appId, HttpServletRequest request) {
+        ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用id不正确");
+        ThrowUtils.throwIf(StrUtil.isBlank(userMessage), ErrorCode.PARAMS_ERROR, "提示词不能为空");
+        //TODO 获取initprompt
+        User loginUser = userService.getLoginUser(request);
+        Flux<String> stringFlux = appService.chatToGenCode(userMessage, appId, loginUser);
+        return stringFlux
+                .map(chunk -> {
+                    Map<String, String> map = Map.of("k", chunk);
+                    String jsonData = JSONUtil.toJsonStr(map);
+                    return ServerSentEvent.<String>builder().data(jsonData).build();
+                })
+                .concatWith(Mono.just(
+                        //发送结束事件
+                        ServerSentEvent.<String>builder().event("done").data("").build()
+                ));
+    }
+
+    /**
      * 应用部署
      *
      * @param appDeployRequest 部署请求
@@ -79,35 +96,6 @@ public class AppController {
         // 调用服务部署应用
         String deployUrl = appService.deployApp(appId, loginUser);
         return Result.success(deployUrl);
-    }
-
-
-    /**
-     * 自动生成应用
-     *
-     * @param userMessage 用户输入
-     * @param appId       应用id
-     * @param request     请求
-     * @return 生成的代码
-     */
-    //   GET /chat/gen/code?userMessage=生成一个博客网站&appId=1L
-    @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> chatToGenCode(@RequestParam String userMessage, @RequestParam Long appId, HttpServletRequest request) {
-        ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用id不正确");
-        ThrowUtils.throwIf(StrUtil.isBlank(userMessage), ErrorCode.PARAMS_ERROR, "提示词不能为空");
-        //TODO 获取initprompt
-        User loginUser = userService.getLoginUser(request);
-        Flux<String> stringFlux = appService.chatToGenCode(userMessage, appId, loginUser);
-        return stringFlux
-                .map(chunk -> {
-                    Map<String, String> map = Map.of("d", chunk);
-                    String jsonData = JSONUtil.toJsonStr(map);
-                    return ServerSentEvent.<String>builder().data(jsonData).build();
-                })
-                .concatWith(Mono.just(
-                        //发送结束事件
-                        ServerSentEvent.<String>builder().event("done").data("").build()
-                ));
     }
 
     /**
@@ -144,6 +132,8 @@ public class AppController {
     // 7. 调用通用下载服务
     projectDownloadService.downloadProjectAsZip(sourceDirPath, downloadFileName, response);
     }
+
+    // ==================== 用户接口增删改查接口 ====================
 
     /**
      * 创建应用

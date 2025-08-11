@@ -19,12 +19,10 @@ class AiCodeGeneratorFacadeTest {
     @Resource
     private AiCodeGeneratorFacade aiCodeGeneratorFacade;
 
-
-
     @Test
     void generateAndSaveCodeStream() {
         Flux<String> stringFlux = aiCodeGeneratorFacade.generateAndSaveCodeStream(
-                "生成一个打字网站", CodeGenTypeEnum.VUE_PROJECT, 4L);
+                "生成一个打字网站", CodeGenTypeEnum.VUE_PROJECT, 1L);
         // 等待所有数据接收完毕
         List<String> res = stringFlux.collectList().block();
         // 将数据拼接成字符串

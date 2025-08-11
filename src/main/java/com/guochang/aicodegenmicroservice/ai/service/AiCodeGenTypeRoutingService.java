@@ -1,4 +1,4 @@
-package com.guochang.aicodegenmicroservice.ai;
+package com.guochang.aicodegenmicroservice.ai.service;
 
 import com.guochang.aicodegenmicroservice.model.enums.CodeGenTypeEnum;
 import dev.langchain4j.service.SystemMessage;

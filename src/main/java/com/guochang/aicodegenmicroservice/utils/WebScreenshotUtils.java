@@ -83,7 +83,7 @@ public static String saveWebPageScreenshot(String webUrl) {
     private static WebDriver initChromeDriver(int width, int height) {
         try {
             // 自动管理 ChromeDriver
-            WebDriverManager.chromedriver().setup();
+            WebDriverManager.chromedriver().browserVersion("135").setup();
             // 配置 Chrome 选项
             ChromeOptions options = new ChromeOptions();
             // 无头模式

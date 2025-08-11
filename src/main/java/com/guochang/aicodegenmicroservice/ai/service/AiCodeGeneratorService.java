@@ -1,4 +1,4 @@
-package com.guochang.aicodegenmicroservice.ai;
+package com.guochang.aicodegenmicroservice.ai.service;
 
 import com.guochang.aicodegenmicroservice.ai.model.HtmlCodeResult;
 import com.guochang.aicodegenmicroservice.ai.model.MultiFileCodeResult;
@@ -9,22 +9,6 @@ import dev.langchain4j.service.UserMessage;
 import reactor.core.publisher.Flux;
 
 public interface AiCodeGeneratorService {
-    /**
-     * 生成html代码
-     * @return
-     */
-    @SystemMessage(fromResource="prompt/codegen-html-system-prompt.txt")
-    HtmlCodeResult generateHtmlCode(String userMessage);
-
-    /**
-     * 生成多文件代码
-     * @return
-     */
-    @SystemMessage(fromResource="prompt/codegen-multi-file-system-prompt.txt")
-    MultiFileCodeResult generateMultiFileCode(String userMessage);
-
-
-
     /**
      * 生成html代码
      * @return
@@ -45,8 +29,4 @@ public interface AiCodeGeneratorService {
      */
     @SystemMessage(fromResource="prompt/codegen-vue-project-system-prompt.txt")
     TokenStream generateVueProjectCodeStream(@MemoryId long appId, @UserMessage String userMessage);
-
-
-
-
 }

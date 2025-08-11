@@ -21,10 +21,10 @@ public class ReasoningStreamingChatModelConfig {
         //为了测试
         final String modelName = "deepseek-chat";
         final int maxTokens = 8192;
-        //生产环境中
-        //final String modelName = "deepseek-reasoner";
-        //final int maxTokens = 32768;
-        return OpenAiStreamingChatModel.builder()
+        //TODO 生产环境中
+    // final String modelName = "deepseek-reasoner";
+    // final int maxTokens = 32768;
+        return  OpenAiStreamingChatModel.builder()
                 .baseUrl(baseUrl)
                 .apiKey(apiKey)
                 .modelName(modelName)

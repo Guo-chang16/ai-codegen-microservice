@@ -24,8 +24,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-
-    //建议resource
     @Resource
     private UserService userService;
 
@@ -133,8 +131,4 @@ public class UserController {
         userVOPage.setRecords(userVOList);
         return Result.success(userVOPage);
     }
-
-
-
-
 }
