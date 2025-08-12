@@ -1,6 +1,6 @@
 ### CUSTOM ###
 application-local.yml
-tmp
+tmp/
 generator/
 webdriver/
 target/
