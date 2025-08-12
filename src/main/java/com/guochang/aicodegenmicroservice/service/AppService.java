@@ -19,34 +19,16 @@ import java.util.List;
 * @createDate 2025-07-31 13:27:01
 */
 public interface AppService extends IService<App> {
-    /**
-     * 获取应用VO
-     *
-     * @param app 应用实体
-     * @return 应用VO
-     */
+
     AppVO getAppVO(App app);
 
-    /**
-     * 获取应用VO列表
-     *
-     * @param appList 应用实体列表
-     * @return 应用VO列表
-     */
     List<AppVO> getAppVOList(List<App> appList);
 
-    /**
-     * 获取查询条件
-     *
-     * @param appQueryRequest 查询请求
-     * @return 查询条件
-     */
     QueryWrapper<App> getQueryWrapper(AppQueryRequest appQueryRequest);
 
     Flux<String> chatToGenCode(String userMessage, Long appId, User loginUser);
 
     String deployApp(Long appId, User loginUser);
-
 
     void generateAppScreenshotAsync(Long appId, String appUrl);
 

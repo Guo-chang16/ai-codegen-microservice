@@ -10,15 +10,4 @@ public interface ProjectDownloadService {
      * @return
      */
     void downloadProjectAsZip(String projectPath, String  downloadFileName, HttpServletResponse response);
-
-
-
-
-
-
-
-
-
-
-
 }

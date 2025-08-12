@@ -8,7 +8,6 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.guochang.aicodegenmicroservice.ai.service.AiCodeGenTitleService;
 import com.guochang.aicodegenmicroservice.ai.service.AiCodeGenTypeRoutingService;
 import com.guochang.aicodegenmicroservice.common.ErrorCode;
 import com.guochang.aicodegenmicroservice.constant.AppConstant;
@@ -70,9 +69,6 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App>
     private ScreenshotService screenshotService;
 
     @Resource
-    private AiCodeGenTitleService aiCodeGenTitleService;
-
-    @Resource
     private AiCodeGenTypeRoutingService aiCodeGenTypeRoutingService;
 
     @Resource
@@ -91,9 +87,8 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App>
         BeanUtil.copyProperties(appAddRequest, app);
         app.setUserId(loginUser.getId());
         String initPrompt = appAddRequest.getInitPrompt();
-        String title = aiCodeGenTitleService.generateTitle(initPrompt);
-        //app.setAppName(initPrompt.substring(0, Math.min(initPrompt.length(), 12)));
-        app.setAppName(title);
+        app.setAppName(initPrompt.substring(0, Math.min(initPrompt.length(), 12)));
+
         CodeGenTypeEnum codeGenTypeEnum = aiCodeGenTypeRoutingService.aiCodeGenTypeRouting(initPrompt);
         app.setCodeGenType(codeGenTypeEnum.getValue());
         // 插入数据库

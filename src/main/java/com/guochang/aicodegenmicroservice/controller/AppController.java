@@ -54,22 +54,25 @@ public class AppController {
     /**
      * 自动生成应用
      *
-     * @param userMessage 用户输入
+     * @param message 用户输入
      * @param appId       应用id
      * @param request     请求
      * @return 让前端流式显示代码
      */
-    //   GET /chat/gen/code?userMessage=生成一个博客网站&appId=1L
+    //   GET /chat/gen/code?message=生成一个博客网站&appId=1L
     @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> chatToGenCode(@RequestParam String userMessage, @RequestParam Long appId, HttpServletRequest request) {
-        ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用id不正确");
-        ThrowUtils.throwIf(StrUtil.isBlank(userMessage), ErrorCode.PARAMS_ERROR, "提示词不能为空");
-        //TODO 获取initprompt
+    public Flux<ServerSentEvent<String>> chatToGenCode(@RequestParam Long appId,
+                                                       @RequestParam String message,
+                                                       HttpServletRequest request) {
+        // 参数校验
+        ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用 id 错误");
+        ThrowUtils.throwIf(StrUtil.isBlank(message), ErrorCode.PARAMS_ERROR, "提示词不能为空");
         User loginUser = userService.getLoginUser(request);
-        Flux<String> stringFlux = appService.chatToGenCode(userMessage, appId, loginUser);
+        Flux<String> stringFlux = appService.chatToGenCode(message, appId, loginUser);
         return stringFlux
                 .map(chunk -> {
-                    Map<String, String> map = Map.of("k", chunk);
+                    //注意:
+                    Map<String, String> map = Map.of("d", chunk);
                     String jsonData = JSONUtil.toJsonStr(map);
                     return ServerSentEvent.<String>builder().data(jsonData).build();
                 })
