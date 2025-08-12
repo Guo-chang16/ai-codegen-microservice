@@ -19,7 +19,7 @@ import reactor.core.publisher.Flux;
 public class StreamHandlerExecutor {
 
     @Resource
-    private JsonMessageStreamHandler jsonMessageStreamHandler;
+    private  JsonMessageStreamHandler jsonMessageStreamHandler;
 
     /**
      * 创建流处理器并处理聊天历史记录

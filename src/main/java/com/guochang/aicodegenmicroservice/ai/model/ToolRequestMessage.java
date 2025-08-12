@@ -19,6 +19,8 @@ public class ToolRequestMessage extends StreamMessage {
 
     private String arguments;
 
+
+    // 构造方法
     public ToolRequestMessage(ToolExecutionRequest toolExecutionRequest) {
         super(StreamMessageTypeEnum.TOOL_REQUEST.getValue());
         this.id = toolExecutionRequest.id();

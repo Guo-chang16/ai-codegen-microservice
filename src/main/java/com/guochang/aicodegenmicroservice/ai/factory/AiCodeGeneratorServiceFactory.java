@@ -25,7 +25,7 @@ public class AiCodeGeneratorServiceFactory {
     private ChatModel chatModel;
 
     @Resource
-    private StreamingChatModel openAiStreamingChatModel;
+    private StreamingChatModel openAiStreamingChatModel;  //注入OpenAI自带的模型的bean
 
     @Resource
     private RedisChatMemoryStore redisChatMemoryStore;
@@ -35,7 +35,6 @@ public class AiCodeGeneratorServiceFactory {
 
     @Resource
     private StreamingChatModel reasoningStreamingChatModel;
-
 
     @Resource
     private ToolManager toolManager;
@@ -58,22 +57,28 @@ public class AiCodeGeneratorServiceFactory {
         // 加载 appId 对应的对话历史
         chatHistoryService.loadChatHistoryToMemory(appId, chatMemory, 20);
         return switch (codeGenType) {
-            case HTML, MULTI_FILE -> AiServices.builder(AiCodeGeneratorService.class)
-                    .chatModel(chatModel)
-                    .streamingChatModel(openAiStreamingChatModel)
-                    .chatMemory(chatMemory)
-                    .build();
+            // HTML、多文件模式使用基础模型
+            case HTML, MULTI_FILE ->
+                AiServices.builder(AiCodeGeneratorService.class)
+                        .chatModel(chatModel)
+                        .streamingChatModel(openAiStreamingChatModel)
+                        .chatMemory(chatMemory)
+                        .build();
 
             // Vue 项目生成使用推理模型
-            case VUE_PROJECT -> AiServices.builder(AiCodeGeneratorService.class)
-                    .streamingChatModel(reasoningStreamingChatModel)
-                    .chatMemoryProvider(memoryId -> chatMemory)
-                    .tools(toolManager.getAllTools())
-                    .hallucinatedToolNameStrategy(toolExecutionRequest -> ToolExecutionResultMessage.from(
-                            toolExecutionRequest, "Error: there is no tool called " + toolExecutionRequest.name()
-                    ))
-                    .build();
-            default -> throw new BusinessException(ErrorCode.PARAMS_ERROR,"没有这种类型");
+            case VUE_PROJECT ->
+                    AiServices.builder(AiCodeGeneratorService.class)
+                            .streamingChatModel(reasoningStreamingChatModel)
+                            .chatMemoryProvider(memoryId -> chatMemory)
+                            .tools(toolManager.getAllTools())
+                            //处理推理模型无法调用的工具(工具幻觉问题)
+                            .hallucinatedToolNameStrategy(toolExecutionRequest -> ToolExecutionResultMessage.from(
+                                    toolExecutionRequest, "Error: there is no tool called " + toolExecutionRequest.name()
+                            ))
+                            .build();
+
+            default -> throw new BusinessException(ErrorCode.SYSTEM_ERROR, "不支持的代码生成类型: " + codeGenType.getValue());
+
         };
     }
 
