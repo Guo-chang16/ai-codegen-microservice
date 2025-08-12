@@ -42,14 +42,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
-* @author 31179
-* @description 针对表【app(应用)】的数据库操作Service实现
-* @createDate 2025-07-31 13:27:01
-*/
+ * @author 31179
+ * @description 针对表【app(应用)】的数据库操作Service实现
+ * @createDate 2025-07-31 13:27:01
+ */
 @Service
 @Slf4j
 public class AppServiceImpl extends ServiceImpl<AppMapper, App>
-    implements AppService{
+        implements AppService {
 
     @Resource
     private UserService userService;
@@ -102,8 +102,6 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App>
         return app.getId();
     }
 
-
-
     @Override
     public Flux<String> chatToGenCode(String userMessage, Long appId, User loginUser) {
         //1.参数校验
@@ -127,7 +125,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App>
         //调用AI模型生成代码
         Flux<String> contentFlux = aiCodeGeneratorFacade.generateAndSaveCodeStream(userMessage, codeGenTypeEnum, appId);
         //收集AI响应内容并在完成后记录到对话历史
-        return streamHandlerExecutor.doExecute(contentFlux,chatHistoryService,appId,loginUser,codeGenTypeEnum);
+        return streamHandlerExecutor.doExecute(contentFlux, chatHistoryService, appId, loginUser, codeGenTypeEnum);
     }
 
     @Override
@@ -188,8 +186,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App>
         newApp.setDeployedTime(LocalDateTime.now());
 
         boolean update = this.updateById(app);
-        ThrowUtils.throwIf(!update,ErrorCode.OPERATION_ERROR,"应用部署失败!");
-
+        ThrowUtils.throwIf(!update, ErrorCode.OPERATION_ERROR, "应用部署失败!");
 
         //返回可访问的URL
         String appDeployUrl = String.format("%s/%s/", AppConstant.CODE_DEPLOY_HOST, deployKey);
@@ -223,7 +220,6 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App>
     }
 
 
-
     @Override
     public AppVO getAppVO(App app) {
         if (app == null) {
@@ -242,27 +238,27 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App>
     }
 
 
-@Override
-public List<AppVO> getAppVOList(List<App> appList) {
-    if (CollUtil.isEmpty(appList)) {
-        return new ArrayList<>();
+    @Override
+    public List<AppVO> getAppVOList(List<App> appList) {
+        if (CollUtil.isEmpty(appList)) {
+            return new ArrayList<>();
+        }
+        // 批量获取用户信息，避免 N+1 查询问题
+        Set<Long> userIds = appList.stream()
+                .map(App::getUserId)
+                .collect(Collectors.toSet());
+        Map<Long, UserVO> userVOMap = userService.listByIds(userIds).stream()
+                .collect(Collectors.toMap(User::getId, userService::getUserVO));
+        return appList.stream().map(app -> {
+            AppVO appVO = getAppVO(app);
+            UserVO userVO = userVOMap.get(app.getUserId());
+            appVO.setUser(userVO);
+            return appVO;
+        }).collect(Collectors.toList());
     }
-    // 批量获取用户信息，避免 N+1 查询问题
-    Set<Long> userIds = appList.stream()
-            .map(App::getUserId)
-            .collect(Collectors.toSet());
-    Map<Long, UserVO> userVOMap = userService.listByIds(userIds).stream()
-            .collect(Collectors.toMap(User::getId, userService::getUserVO));
-    return appList.stream().map(app -> {
-        AppVO appVO = getAppVO(app);
-        UserVO userVO = userVOMap.get(app.getUserId());
-        appVO.setUser(userVO);
-        return appVO;
-    }).collect(Collectors.toList());
-}
 
 
-@Override
+    @Override
     public QueryWrapper<App> getQueryWrapper(AppQueryRequest appQueryRequest) {
         if (appQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
@@ -318,7 +314,6 @@ public List<AppVO> getAppVOList(List<App> appList) {
         // 删除应用
         return super.removeById(id);
     }
-
 
 
 }

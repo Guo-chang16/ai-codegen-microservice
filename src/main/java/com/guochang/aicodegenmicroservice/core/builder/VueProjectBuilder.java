@@ -24,6 +24,7 @@ public class VueProjectBuilder {
                 .start(() -> {
                     try {
                         buildProject(projectPath);
+                        log.error("异步构建 Vue 项目成功!");
                     } catch (Exception e) {
                         log.error("异步构建 Vue 项目时发生异常: {}", e.getMessage(), e);
                     }
