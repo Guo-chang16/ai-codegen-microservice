@@ -50,7 +50,7 @@ public static String saveWebPageScreenshot(String webUrl) {
     String rootPath = SCREENSHOT_ROOT_DIR + UUID.randomUUID().toString().substring(0, 8);
     FileUtil.mkdir(rootPath);
     final String IMAGE_SUFFIX = ".png";
-    String imagePath = rootPath + File.separator + RandomUtil.randomNumbers(5);
+   String imagePath = rootPath + File.separator + RandomUtil.randomNumbers(5) + IMAGE_SUFFIX;
 
     //等待网页加载
     webDriver.get(webUrl);
@@ -63,7 +63,7 @@ public static String saveWebPageScreenshot(String webUrl) {
 
     //压缩图片
     final String COMPRESS_SUFFIX = "_compressed.jpg";
-    String compressImagePath = rootPath + File.separator + RandomUtil.randomNumbers(5) + IMAGE_SUFFIX;
+    String compressImagePath = rootPath + File.separator + RandomUtil.randomNumbers(5) + COMPRESS_SUFFIX;
     compressImage(imagePath, compressImagePath);
 
     //删除原始图片  清理本地缓存
