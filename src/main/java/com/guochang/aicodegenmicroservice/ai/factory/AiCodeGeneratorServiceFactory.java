@@ -68,6 +68,7 @@ public class AiCodeGeneratorServiceFactory {
             // Vue 项目生成使用推理模型
             case VUE_PROJECT ->
                     AiServices.builder(AiCodeGeneratorService.class)
+                            .chatModel(chatModel)
                             .streamingChatModel(reasoningStreamingChatModel)
                             .chatMemoryProvider(memoryId -> chatMemory)
                             .tools(toolManager.getAllTools())
