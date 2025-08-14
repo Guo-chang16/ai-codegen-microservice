@@ -19,7 +19,7 @@ import java.nio.file.Paths;
  */
 @Slf4j
 @Component
-public class FileReadTool extends BaseTool{
+public class FileReadTool extends BaseTool {
 
     @Tool("读取指定路径的文件内容")
     public String readFile(
@@ -60,5 +60,4 @@ public class FileReadTool extends BaseTool{
         String relativeFilePath = arguments.getStr("relativeFilePath");
         return String.format("[工具调用] %s %s", getDisplayName(), relativeFilePath);
     }
-
-}
+} 

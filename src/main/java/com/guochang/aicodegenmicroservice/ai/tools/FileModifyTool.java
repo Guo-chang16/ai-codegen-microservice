@@ -20,7 +20,7 @@ import java.nio.file.StandardOpenOption;
  */
 @Slf4j
 @Component
-public class FileModifyTool extends BaseTool{
+public class FileModifyTool extends BaseTool {
 
     @Tool("修改文件内容，用新内容替换指定的旧内容")
     public String modifyFile(
@@ -60,7 +60,6 @@ public class FileModifyTool extends BaseTool{
         }
     }
 
-
     @Override
     public String getToolName() {
         return "modifyFile";
@@ -91,5 +90,4 @@ public class FileModifyTool extends BaseTool{
                 ```
                 """, getDisplayName(), relativeFilePath, oldContent, newContent);
     }
-
 }

@@ -1,10 +1,9 @@
 package com.guochang.aicodegenmicroservice.core.handler;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.guochang.aicodegenmicroservice.ai.model.*;
+import com.guochang.aicodegenmicroservice.ai.model.message.*;
 import com.guochang.aicodegenmicroservice.ai.tools.BaseTool;
 import com.guochang.aicodegenmicroservice.ai.tools.ToolManager;
 import com.guochang.aicodegenmicroservice.constant.AppConstant;
@@ -90,18 +89,15 @@ public class JsonMessageStreamHandler {
             case TOOL_REQUEST -> {
                 ToolRequestMessage toolRequestMessage = JSONUtil.toBean(chunk, ToolRequestMessage.class);
                 String toolId = toolRequestMessage.getId();
+                String toolName = toolRequestMessage.getName();
                 // 检查是否是第一次看到这个工具 ID
                 if (toolId != null && !seenToolIds.contains(toolId)) {
-                    // 第一次调用这个工具，记录 ID 并完整返回工具信息
+                    // 第一次调用这个工具，记录 ID 并返回工具信息
                     seenToolIds.add(toolId);
-                    BaseTool tool = toolManager.getTool(toolRequestMessage.getName());
-                    if (tool != null) {
-                        return  tool.generateToolRequestResponse();
-                    } else {
-                        // 记录日志或返回默认响应
-                        log.warn("Tool is null, skipping tool request response generation.");
-                        return "";
-                    }
+                    // 根据工具名称获取工具实例
+                    BaseTool tool = toolManager.getTool(toolName);
+                    // 返回格式化的工具调用信息
+                    return tool.generateToolRequestResponse();
                 } else {
                     // 不是第一次调用这个工具，直接返回空
                     return "";

@@ -22,7 +22,7 @@ import java.util.Set;
  */
 @Slf4j
 @Component
-public class FileDirReadTool extends BaseTool{
+public class FileDirReadTool extends BaseTool {
 
     /**
      * 需要忽略的文件和目录
@@ -76,7 +76,6 @@ public class FileDirReadTool extends BaseTool{
                         structure.append(indent).append(file.getName());
                     });
             return structure.toString();
-
         } catch (Exception e) {
             String errorMessage = "读取目录结构失败: " + relativeDirPath + ", 错误: " + e.getMessage();
             log.error(errorMessage, e);
@@ -106,8 +105,6 @@ public class FileDirReadTool extends BaseTool{
         return IGNORED_EXTENSIONS.stream().anyMatch(fileName::endsWith);
     }
 
-    // 核心方法不变，此处省略
-
     @Override
     public String getToolName() {
         return "readDir";
@@ -126,5 +123,4 @@ public class FileDirReadTool extends BaseTool{
         }
         return String.format("[工具调用] %s %s", getDisplayName(), relativeDirPath);
     }
-
-}
+} 

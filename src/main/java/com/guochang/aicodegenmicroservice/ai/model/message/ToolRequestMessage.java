@@ -1,4 +1,4 @@
-package com.guochang.aicodegenmicroservice.ai.model;
+package com.guochang.aicodegenmicroservice.ai.model.message;
 
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import lombok.Data;

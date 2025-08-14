@@ -1,9 +1,11 @@
 package com.guochang.aicodegenmicroservice.core;
 
 import cn.hutool.json.JSONUtil;
+import com.guochang.aicodegenmicroservice.ai.model.message.AiResponseMessage;
+import com.guochang.aicodegenmicroservice.ai.model.message.ToolExecutedMessage;
+import com.guochang.aicodegenmicroservice.ai.model.message.ToolRequestMessage;
 import com.guochang.aicodegenmicroservice.ai.service.AiCodeGeneratorService;
 import com.guochang.aicodegenmicroservice.ai.factory.AiCodeGeneratorServiceFactory;
-import com.guochang.aicodegenmicroservice.ai.model.*;
 import com.guochang.aicodegenmicroservice.common.ErrorCode;
 import com.guochang.aicodegenmicroservice.core.parser.CodeParserExecutor;
 import com.guochang.aicodegenmicroservice.core.saver.CodeFileSaverExecutor;

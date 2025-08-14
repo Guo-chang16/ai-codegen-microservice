@@ -1,4 +1,4 @@
-package com.guochang.aicodegenmicroservice.ai.model;
+package com.guochang.aicodegenmicroservice.ai.model.message;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

@@ -1,8 +1,8 @@
 package com.guochang.aicodegenmicroservice.ai.tools;
 
+
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.json.JSONObject;
-import com.guochang.aicodegenmicroservice.ai.tools.BaseTool;
 import com.guochang.aicodegenmicroservice.constant.AppConstant;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
@@ -37,7 +37,6 @@ public class FileWriteTool extends BaseTool {
             if (!path.isAbsolute()) {
                 // 相对路径处理，创建基于 appId 的项目目录
                 String projectDirName = "vue_project_" + appId;
-                //
                 Path projectRoot = Paths.get(AppConstant.CODE_OUTPUT_ROOT_DIR, projectDirName);
                 path = projectRoot.resolve(relativeFilePath);
             }
