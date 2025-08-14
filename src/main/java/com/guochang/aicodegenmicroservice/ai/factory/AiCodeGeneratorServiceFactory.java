@@ -1,11 +1,16 @@
 package com.guochang.aicodegenmicroservice.ai.factory;
 
 import com.guochang.aicodegenmicroservice.ai.service.AiCodeGeneratorService;
+import com.guochang.aicodegenmicroservice.ai.tools.FileDirReadTool;
+import com.guochang.aicodegenmicroservice.ai.tools.FileModifyTool;
+import com.guochang.aicodegenmicroservice.ai.tools.FileWriteTool;
 import com.guochang.aicodegenmicroservice.ai.tools.ToolManager;
 import com.guochang.aicodegenmicroservice.common.ErrorCode;
+import com.guochang.aicodegenmicroservice.config.StreamingChatModelConfig;
 import com.guochang.aicodegenmicroservice.exception.BusinessException;
 import com.guochang.aicodegenmicroservice.model.enums.CodeGenTypeEnum;
 import com.guochang.aicodegenmicroservice.service.ChatHistoryService;
+import com.guochang.aicodegenmicroservice.utils.SpringContextUtil;
 import dev.langchain4j.community.store.memory.chat.redis.RedisChatMemoryStore;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
@@ -21,20 +26,14 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class AiCodeGeneratorServiceFactory {
 
-    @Resource
-    private ChatModel chatModel;
-
-    @Resource
-    private StreamingChatModel openAiStreamingChatModel;  //注入OpenAI自带的模型的bean
+//    @Resource(name = "openAiChatModel")
+//    private ChatModel chatModel;
 
     @Resource
     private RedisChatMemoryStore redisChatMemoryStore;
 
     @Resource
     private ChatHistoryService chatHistoryService;
-
-    @Resource
-    private StreamingChatModel reasoningStreamingChatModel;
 
     @Resource
     private ToolManager toolManager;
@@ -58,25 +57,30 @@ public class AiCodeGeneratorServiceFactory {
         chatHistoryService.loadChatHistoryToMemory(appId, chatMemory, 20);
         return switch (codeGenType) {
             // HTML、多文件模式使用基础模型
-            case HTML, MULTI_FILE ->
-                AiServices.builder(AiCodeGeneratorService.class)
-                        .chatModel(chatModel)
+            case HTML, MULTI_FILE -> {
+                //使用多例模式解决并发问题
+                StreamingChatModel openAiStreamingChatModel = SpringContextUtil.getBean("streamingChatModelPrototype", StreamingChatModel.class);
+                yield AiServices.builder(AiCodeGeneratorService.class)
+//                        .chatModel(chatModel)
                         .streamingChatModel(openAiStreamingChatModel)
                         .chatMemory(chatMemory)
                         .build();
+            }
 
             // Vue 项目生成使用推理模型
-            case VUE_PROJECT ->
-                    AiServices.builder(AiCodeGeneratorService.class)
-                            .chatModel(chatModel)
-                            .streamingChatModel(reasoningStreamingChatModel)
-                            .chatMemoryProvider(memoryId -> chatMemory)
-                            .tools(toolManager.getAllTools())
-                            //处理推理模型无法调用的工具(工具幻觉问题)
-                            .hallucinatedToolNameStrategy(toolExecutionRequest -> ToolExecutionResultMessage.from(
-                                    toolExecutionRequest, "Error: there is no tool called " + toolExecutionRequest.name()
-                            ))
-                            .build();
+            case VUE_PROJECT -> {
+                StreamingChatModel reasoningStreamingChatModel = SpringContextUtil.getBean("reasoningStreamingChatModelPrototype", StreamingChatModel.class);
+                yield AiServices.builder(AiCodeGeneratorService.class)
+//                        .chatModel(chatModel)
+                        .streamingChatModel(reasoningStreamingChatModel)
+                        .chatMemoryProvider(memoryId -> chatMemory)
+                        .tools(toolManager.getAllTools())
+                        //处理推理模型无法调用的工具(工具幻觉问题)
+                        .hallucinatedToolNameStrategy(toolExecutionRequest -> ToolExecutionResultMessage.from(
+                                toolExecutionRequest, "Error: there is no tool called " + toolExecutionRequest.name()
+                        ))
+                        .build();
+            }
 
             default -> throw new BusinessException(ErrorCode.SYSTEM_ERROR, "不支持的代码生成类型: " + codeGenType.getValue());
 
