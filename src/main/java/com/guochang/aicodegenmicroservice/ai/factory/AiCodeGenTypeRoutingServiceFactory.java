@@ -2,6 +2,7 @@ package com.guochang.aicodegenmicroservice.ai.factory;
 
 
 import com.guochang.aicodegenmicroservice.ai.service.AiCodeGenTypeRoutingService;
+import com.guochang.aicodegenmicroservice.utils.SpringContextUtil;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.AiServices;
 import jakarta.annotation.Resource;
@@ -13,14 +14,17 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class AiCodeGenTypeRoutingServiceFactory {
 
-    @Resource
-    private ChatModel chatModel;
 
-    @Bean
-    public AiCodeGenTypeRoutingService aiCodeGenTypeRoutingService(){
+    public AiCodeGenTypeRoutingService createAiCodeGenTypeRoutingService(){
+        ChatModel chatModel = SpringContextUtil.getBean("routingChatModelPrototype", ChatModel.class);
         return AiServices.builder(AiCodeGenTypeRoutingService.class)
                 .chatModel(chatModel)
                 .build();
+    }
+
+    @Bean
+    public AiCodeGenTypeRoutingService aiCodeGenTypeRoutingService(){
+        return createAiCodeGenTypeRoutingService();
     }
 
 }

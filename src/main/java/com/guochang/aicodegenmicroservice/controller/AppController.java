@@ -18,12 +18,15 @@ import com.guochang.aicodegenmicroservice.model.dto.app.*;
 import com.guochang.aicodegenmicroservice.model.entity.App;
 import com.guochang.aicodegenmicroservice.model.entity.User;
 import com.guochang.aicodegenmicroservice.model.vo.AppVO;
+import com.guochang.aicodegenmicroservice.ratelimiter.annotation.RateLimit;
+import com.guochang.aicodegenmicroservice.ratelimiter.enums.RateLimitType;
 import com.guochang.aicodegenmicroservice.service.AppService;
 import com.guochang.aicodegenmicroservice.service.ProjectDownloadService;
 import com.guochang.aicodegenmicroservice.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
@@ -61,6 +64,7 @@ public class AppController {
      */
     //   GET /chat/gen/code?message=生成一个博客网站&appId=1L
     @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @RateLimit(limitType = RateLimitType.USER, rate = 5, rateInterval = 60, message = "AI 对话请求过于频繁，请稍后再试")
     public Flux<ServerSentEvent<String>> chatToGenCode(@RequestParam Long appId,
                                                        @RequestParam String message,
                                                        HttpServletRequest request) {
