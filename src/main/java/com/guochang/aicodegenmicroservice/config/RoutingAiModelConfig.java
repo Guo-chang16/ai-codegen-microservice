@@ -23,6 +23,8 @@ public class RoutingAiModelConfig {
 
     private Double temperature;
 
+    private Integer maxRetries;
+
     private Boolean logRequests = false;
 
     private Boolean logResponses = false;
@@ -41,6 +43,7 @@ public class RoutingAiModelConfig {
                 .temperature(temperature)
                 .logRequests(logRequests)
                 .logResponses(logResponses)
+                .maxRetries(maxRetries)
                 .build();
     }
 }
