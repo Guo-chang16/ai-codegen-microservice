@@ -1,5 +1,6 @@
 package com.guochang.aicodegenmicroservice.ai.factory;
 
+import com.guochang.aicodegenmicroservice.ai.guardrail.PromptSafetyInputGuardrail;
 import com.guochang.aicodegenmicroservice.ai.service.AiCodeGeneratorService;
 import com.guochang.aicodegenmicroservice.ai.tools.FileDirReadTool;
 import com.guochang.aicodegenmicroservice.ai.tools.FileModifyTool;
@@ -25,9 +26,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Slf4j
 public class AiCodeGeneratorServiceFactory {
-
-//    @Resource(name = "openAiChatModel")
-//    private ChatModel chatModel;
 
     @Resource
     private RedisChatMemoryStore redisChatMemoryStore;
@@ -61,9 +59,9 @@ public class AiCodeGeneratorServiceFactory {
                 //使用多例模式解决并发问题
                 StreamingChatModel openAiStreamingChatModel = SpringContextUtil.getBean("streamingChatModelPrototype", StreamingChatModel.class);
                 yield AiServices.builder(AiCodeGeneratorService.class)
-//                        .chatModel(chatModel)
                         .streamingChatModel(openAiStreamingChatModel)
                         .chatMemory(chatMemory)
+                        .inputGuardrails(new PromptSafetyInputGuardrail())  // 添加输入护轨
                         .build();
             }
 
@@ -71,7 +69,6 @@ public class AiCodeGeneratorServiceFactory {
             case VUE_PROJECT -> {
                 StreamingChatModel reasoningStreamingChatModel = SpringContextUtil.getBean("reasoningStreamingChatModelPrototype", StreamingChatModel.class);
                 yield AiServices.builder(AiCodeGeneratorService.class)
-//                        .chatModel(chatModel)
                         .streamingChatModel(reasoningStreamingChatModel)
                         .chatMemoryProvider(memoryId -> chatMemory)
                         .tools(toolManager.getAllTools())
@@ -79,6 +76,7 @@ public class AiCodeGeneratorServiceFactory {
                         .hallucinatedToolNameStrategy(toolExecutionRequest -> ToolExecutionResultMessage.from(
                                 toolExecutionRequest, "Error: there is no tool called " + toolExecutionRequest.name()
                         ))
+                        .inputGuardrails(new PromptSafetyInputGuardrail())  // 添加输入护轨
                         .build();
             }
 
