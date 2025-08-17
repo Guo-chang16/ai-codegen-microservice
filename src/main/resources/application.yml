@@ -26,6 +26,14 @@ server:
   servlet:
     context-path: /api
 
+sa-token:
+  token-name: satoken
+  timeout: 2592000
+  active-timeout: -1
+  is-concurrent: false
+  is-share: true
+  token-style: uuid
+  is-log: true
 
 # springdoc-openapi
 springdoc:

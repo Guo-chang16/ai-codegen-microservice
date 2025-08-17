@@ -1,5 +1,7 @@
 package com.guochang.aicodegenmicroservice.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.guochang.aicodegenmicroservice.annotation.AuthCheck;
@@ -55,14 +57,15 @@ public class UserController {
 
     @PostMapping("/logout")
     public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
-        ThrowUtils.throwIf(request == null, ErrorCode.PARAMS_ERROR);
-        boolean result = userService.userLogout(request);
-        return Result.success(result);
+        StpUtil.checkLogin();
+        // 移除登录态
+        StpUtil.logout();
+        return Result.success(true);
     }
 
     @PostMapping("/add")
     //最重要的：设置管理员权限
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
     public BaseResponse<Long> addUser(@RequestBody UserAddRequest userAddRequest) {
         ThrowUtils.throwIf(userAddRequest == null || userAddRequest.getUserAccount().length()< 4, ErrorCode.PARAMS_ERROR,"参数为空或账号名长度小于4");
         User user = new User();
@@ -70,6 +73,7 @@ public class UserController {
         final String DEFAULT_PASSWORD = "12345678";
         String encryptPassword = userService.getEncryptPassword(DEFAULT_PASSWORD);
         user.setUserPassword(encryptPassword);
+        user.setUserAvatar("https://ai-codegen-1370356098.cos.ap-guangzhou.myqcloud.com/image/8888.png");
         boolean save = userService.save(user);
         ThrowUtils.throwIf(!save, ErrorCode.OPERATION_ERROR, "新增用户失败");
         Long id = user.getId();
@@ -77,7 +81,7 @@ public class UserController {
     }
 
     @GetMapping("/get")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
     public BaseResponse<User> getUserById(long id) {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR, "请求的Id错误");
         User user = userService.getById(id);
@@ -99,7 +103,7 @@ public class UserController {
     }
 
     @PostMapping("/delete")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> deleteUserById(@RequestBody DeleteRequest deleteRequest) {
         Long id = deleteRequest.getId();
         ThrowUtils.throwIf(deleteRequest == null || id <= 0, ErrorCode.PARAMS_ERROR, "参数传递错误");
@@ -109,7 +113,7 @@ public class UserController {
 
     @PostMapping("/update")
     //最重要的：设置管理员权限
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest) {
         ThrowUtils.throwIf(userUpdateRequest == null || userUpdateRequest.getId() == null, ErrorCode.PARAMS_ERROR);
         User user = new User();
@@ -120,7 +124,7 @@ public class UserController {
     }
 
     @PostMapping("/list/page/vo")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
     public BaseResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest) {
         ThrowUtils.throwIf(userQueryRequest == null, ErrorCode.PARAMS_ERROR);
         long current = userQueryRequest.getCurrent();
