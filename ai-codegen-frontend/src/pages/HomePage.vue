@@ -158,10 +158,18 @@ onMounted(() => {
 
 <template>
   <div id="homePage">
+    <!-- 背景图片放在最顶部 -->
+    <img
+      src="../assets/background.png"
+      alt="background"
+      draggable="false"
+      class="page-background"
+    />
+
     <div class="container">
       <!-- 网站标题和描述 -->
       <div class="hero-section">
-        <h1 class="hero-title">AI 应用生成平台</h1>
+        <h1 class="hero-title">一句话 构所想</h1>
         <p class="hero-description">简化代码开发，完整输出应用</p>
       </div>
 
@@ -192,7 +200,7 @@ onMounted(() => {
               '请帮我设计一个纯HTML/CSS/JS的个人展示网站，包含：顶部动态头像与标题区、个人简介与技能展示区、项目展示区、职业经历时间轴和联系表单。要求响应式布局，支持暗黑模式切换，使用原生技术实现，添加简单的交互动画效果。',
             )
           "
-          >🔥个人展示网站</a-button
+        >🔥个人展示网站</a-button
         >
         <a-button
           type="default"
@@ -201,7 +209,7 @@ onMounted(() => {
               '请帮我设计一个纯 HTML/CSS/JS 的单页面博客网站，包含：顶部带导航的标题区、博客文章列表展示区（含标题、摘要、发布时间）、热门标签 / 分类筛选区、最新评论展示区和底部版权信息区。要求响应式布局，支持暗黑模式切换，使用原生技术实现，添加文章卡片悬停动画、标签点击筛选动效和页面滚动时的导航栏样式变化效果。',
             )
           "
-          >极简博客网站</a-button
+        >极简博客网站</a-button
         >
         <a-button
           type="default"
@@ -210,7 +218,7 @@ onMounted(() => {
               '使用Vue3构建一个功能完整的秒杀商城，包含商品展示、购物车、用户注册登录、订单管理、支付结算等功能。设计现代化的商品卡片布局，支持商品搜索筛选、用户评价、优惠券系统和会员积分功能。',
             )
           "
-          >秒杀商城</a-button
+        >秒杀商城</a-button
         >
         <a-button
           type="default"
@@ -219,13 +227,13 @@ onMounted(() => {
               '使用Vue3开发一个 AI 流式对话界面，用于展示大语言模型的交互能力。需要支持实时流式响应， 用户与 AI 对话点击发送按钮，流式显示大模型返回结果,大模型返回数据可能为文本，可以查看消息历史记录，添加在代码块有复制功能等。项目要求：  1. 响应式布局，适配不同尺寸的设备。  2. 流式显示，用户发送消息后实时流式显示大模型返回结果。  3. 代码高亮，对返回的代码块进行语法高亮显示。  4. 消息历史，完整保存并显示对话历史记录。  5. 实现美观的 UI 界面。',
             )
           "
-          >AI对话网站</a-button
+        >AI对话网站</a-button
         >
       </div>
 
-      <!-- 精选案例 -->
+      <!-- 精选作品 -->
       <div class="section">
-        <h2 class="section-title">精选案例</h2>
+        <h2 class="section-title">精选作品</h2>
         <div class="featured-grid">
           <AppCard
             v-for="app in featuredApps"
@@ -276,40 +284,26 @@ onMounted(() => {
 </template>
 
 <style scoped>
-#homePage {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  background:
-    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 8%, #e2e8f0 20%, #cbd5e1 100%),
-    radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
-  position: relative;
-  overflow: hidden;
-}
-
-/* 科技感网格背景 */
-#homePage::before {
-  content: '';
+/* 背景图片样式 */
+.page-background {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background-image:
-    linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px),
-    linear-gradient(rgba(139, 92, 246, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(139, 92, 246, 0.04) 1px, transparent 1px);
-  background-size:
-    100px 100px,
-    100px 100px,
-    20px 20px,
-    20px 20px;
-  pointer-events: none;
-  animation: gridFloat 20s ease-in-out infinite;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+#homePage {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.container {
+  position: relative;
+  z-index: 2;
 }
 
 /* 动态光效 */
@@ -369,7 +363,7 @@ onMounted(() => {
   text-align: center;
   padding: 80px 0 60px;
   margin-bottom: 28px;
-  color: #1e293b;
+  /* color: #1e293b; */
   position: relative;
   overflow: hidden;
 }
@@ -381,10 +375,6 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background:
-    radial-gradient(ellipse 800px 400px at center, rgba(59, 130, 246, 0.12) 0%, transparent 70%),
-    linear-gradient(45deg, transparent 30%, rgba(139, 92, 246, 0.05) 50%, transparent 70%),
-    linear-gradient(-45deg, transparent 30%, rgba(16, 185, 129, 0.04) 50%, transparent 70%);
   animation: heroGlow 10s ease-in-out infinite alternate;
 }
 
@@ -409,7 +399,7 @@ onMounted(() => {
 }
 
 .hero-title {
-  font-size: 56px;
+  font-size: 40px;
   font-weight: 700;
   margin: 0 0 20px;
   line-height: 1.2;
