@@ -39,6 +39,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * 应用接口
  */
@@ -76,7 +77,7 @@ public class AppController {
         Flux<String> stringFlux = appService.chatToGenCode(message, appId, loginUser);
         return stringFlux
                 .map(chunk -> {
-                    //注意:
+                    //注意
                     Map<String, String> map = Map.of("d", chunk);
                     String jsonData = JSONUtil.toJsonStr(map);
                     return ServerSentEvent.<String>builder().data(jsonData).build();
@@ -285,6 +286,7 @@ public class AppController {
      * @return 精选应用列表
      */
     @PostMapping("/good/list/page/vo")
+    //@Cacheable(value ="good_app_page" , key = "T(com.guochang.utils.CacheKeyUtils).getCacheKey(appQueryRequest)", condition = "appQueryRequest.current<=5")
     public BaseResponse<Page<AppVO>> listGoodAppVOByPage(@RequestBody AppQueryRequest appQueryRequest) {
         ThrowUtils.throwIf(appQueryRequest == null, ErrorCode.PARAMS_ERROR);
         // 限制每页最多 20 个
@@ -310,6 +312,7 @@ public class AppController {
      */
     @PostMapping("/admin/delete")
     @SaCheckRole(UserConstant.ADMIN_ROLE)
+//    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> deleteAppByAdmin(@RequestBody DeleteRequest deleteRequest) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
